@@ -6,7 +6,7 @@ namespace NBodyProblemSimulation.Physics
     internal class PhysicsEngine
     {
         public List<CelestialBody> Bodies { get;  } = new();
-        public double G = 4 * Math.Pow( Math.PI, 2); // 6.67430e-11
+        public double gravitationalConstant = 4 * Math.Pow( Math.PI, 2); // This is the gravitational constant in AU^3 / (Solar Mass * Year^2)
 
         // Initializers
 
@@ -20,7 +20,7 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody sun = new CelestialBody(
                 name: "Sun",
                 mass: 1,
-                position: new Vector2(0, 0),
+                position: new Vector2(500, 500),
                 velocity: new Vector2(0, 0),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
@@ -29,13 +29,15 @@ namespace NBodyProblemSimulation.Physics
             Bodies.Add(sun);
         }
 
+        // Test Setups
+
         public void TwoBodyOrbitTest()
         {
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
                 position: new Vector2(100, 100),
-                velocity: new Vector2((float)-5.1E-08, (float)5.7847E-08),
+                velocity: new Vector2((float)-5.1E-02, (float)5.7847E-02),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.Yellow
@@ -44,7 +46,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 2",
                 mass: 1,
                 position: new Vector2(1200, 600),
-                velocity: new Vector2((float)5.1E-08, (float)-5.7847E-08),
+                velocity: new Vector2((float)5.1E-02, (float)-5.7847E-02),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
@@ -109,7 +111,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 1",
                 mass: 1,
                 position: new Vector2(750,500),
-                velocity: new Vector2((float)0.000000080584, (float) 0.000000588836),
+                velocity: new Vector2((float)0.080584, (float) 0.588836),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
@@ -118,7 +120,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 2",
                 mass: 1,
                 position: new Vector2(1050, 500),
-                velocity: new Vector2((float)0.000000080584, (float)0.000000588836),
+                velocity: new Vector2((float)0.080584, (float)0.588836),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
@@ -127,7 +129,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 3",
                 mass: 1,
                 position: new Vector2(900, 500),
-                velocity: new Vector2((float) -0.000000161168, (float) -0.000001177672),
+                velocity: new Vector2((float) -0.161168, (float) -1.177672),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
@@ -136,7 +138,7 @@ namespace NBodyProblemSimulation.Physics
             Bodies.Add(Star1);
             Bodies.Add(Star2);
             Bodies.Add(Star3);
-        } // Doesnt work
+        } // Doesn't work
 
         public void EightShapeTest()
         {
@@ -149,7 +151,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 1",
                 mass: 1,
                 position: new Vector2(700f - 97.000436f, 500f + 24.308753f),
-                velocity: new Vector2((float)(0.466203685e-6), (float)(0.432365730e-6)),
+                velocity: new Vector2((float)(0.466203685), (float)(0.432365730)),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
@@ -158,7 +160,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 2",
                 mass: 1,
                 position: new Vector2(700f + 97.000436f, 500f - 24.308753f),
-                velocity: new Vector2((float)(0.466203685e-6), (float)(0.432365730e-6)),
+                velocity: new Vector2((float)(0.466203685), (float)(0.432365730)),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
@@ -167,7 +169,7 @@ namespace NBodyProblemSimulation.Physics
                 name: "Star 3",
                 mass: 1,
                 position: new Vector2(700f, 500f),
-                velocity: new Vector2((float)(-0.932407370e-6), (float)(-0.864731460e-6)),
+                velocity: new Vector2((float)(-0.932407370), (float)(-0.864731460)),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
@@ -175,11 +177,13 @@ namespace NBodyProblemSimulation.Physics
             Bodies.Add(Star1);
             Bodies.Add(Star2);
             Bodies.Add(Star3);
-        }
+        } // Not works
+
+        
 
         // Methods
 
-        public void ComputeAcceleration(CelestialBody body, double gravitationalConstant = 6.67430e-11, double eps = 1e-3)
+        public void ComputeAcceleration(CelestialBody body, double eps = 1e-3)
         {
             /*
              * This method computes the acceleration of a celestial body due to the gravitational forces exerted by all other bodies in the simulation.
@@ -196,19 +200,13 @@ namespace NBodyProblemSimulation.Physics
                 if (body == otherBody) continue;
 
                 // Calculate gravitational force based on Newton's law of universal gravitation
-                Vector2 displacementVector = (body.Position - otherBody.Position) * -1; // WHY IS THIS NEEDED? WHY DO WE NEED  * -1??????????????????????????????????????????????????????????????????????????????????????????????????
-                System.Diagnostics.Debug.WriteLine($"Displacement vector between {body.Name} and {otherBody.Name}: {displacementVector}"); // DEBUG
-                double distance = Math.Sqrt((body.Position - otherBody.Position).LengthSquared() + eps * eps); // The distance is softned to avoid short distance infinite forces
+                Vector2 displacementVector = (body.Position - otherBody.Position) * -1; // We apply a negative sign to get the vector pointing from body to otherBody
+                double distance = Math.Sqrt((body.Position - otherBody.Position).LengthSquared() + eps * eps); // The distance is softened to avoid short distance infinite forces
                 double invertedDistanceCube = 1.0 / Math.Pow(distance, 3); // 1/r^3
 
                 float factor = (float)(gravitationalConstant * otherBody.Mass * invertedDistanceCube);
                 Vector2 acceleration = displacementVector * factor;
-                System.Diagnostics.Debug.WriteLine($"Data for the CelestialBody {body.Name} is as follows: " +
-                    $"Mass: {body.Mass} || OtherBody Mass: {otherBody.Mass} || Distance from {otherBody.Name}: {distance} ||" +
-                    $"Acceleration computed as: {acceleration}"); // DEBUG
-
                 body.Acceleration += acceleration;
-
             }   
         }
 
@@ -233,39 +231,57 @@ namespace NBodyProblemSimulation.Physics
 
         }
 
-        public void ComputePositionBasedOnVerletIntegration(CelestialBody body, float timeStep)
+        public void ComputePositionBasedOnVerletIntegration(float timeStep)
         {
             /*
-             * This method uses the Velocity Verlet integration algorithm to update the position and velocity of a celestial body.
+             * This method uses the Velocity Verlet integration algorithm to update the position and velocity of a celestial body. //////////////////////
              * The Verlet method updates the position of an object based on its previous position,
              * its current acceleration (which is related to the force acting on it), and the time step.
              */
-            if (body.Trail.Count > 500)
+
+            // Update acceleration for every body first
+
+            foreach(CelestialBody body in Bodies)
             {
-                body.Trail.RemoveAt(0);
+                ComputeAcceleration(body);
+                body.OldAcceleration = body.Acceleration;
             }
 
-            //
-            ComputeAcceleration(body);
-            Vector2 initialPosition = body.Position;
-            body.Position += body.Velocity * timeStep + 0.5f * body.Acceleration * timeStep * timeStep;
-            Vector2 newAcceleration = body.Acceleration; // Store the current acceleration
-            ComputeAcceleration(body); // Recompute acceleration at the new position
-            body.Velocity += 0.5f * (newAcceleration + body.Acceleration) * timeStep; // Update velocity using average acceleration
-            body.Trail.Add(initialPosition);
+            foreach (CelestialBody body in Bodies)
+            {
+                if (body.Trail.Count > 500)
+                {
+                    body.Trail.RemoveAt(0);
+                }
 
-            // DEBUG
-            System.Diagnostics.Debug.WriteLine($"Body: {body.Name} || New Position: {body.Position} || New Velocity: {body.Velocity} || Acceleration: {body.Acceleration}");
+                //
+                Vector2 initialPosition = body.Position;
+                body.Trail.Add(initialPosition);
+
+                body.Position += body.Velocity * timeStep + 0.5f * body.Acceleration * timeStep * timeStep;
+            }
+
+            foreach (CelestialBody body in Bodies) // Computes new acceleration at the new position for all bodies
+            {
+                ComputeAcceleration(body);
+            }
+
+            foreach (CelestialBody body in Bodies) // Finally updates velocity for all bodies
+            {
+
+                body.Velocity += 0.5f * (body.OldAcceleration + body.Acceleration) * timeStep; // Update velocity using average acceleration
+
+
+                // DEBUG
+                //System.Diagnostics.Debug.WriteLine($"Body: {body.Name} || New Position: {body.Position} || New Velocity: {body.Velocity} || Acceleration: {body.Acceleration}");
+            }
         }
-
+        
         // Temp Func
         public void Update(float timeStep)
         {
-            System.Diagnostics.Debug.WriteLine(timeStep); // DEBUG
-            foreach (var body in Bodies)
-            {
-                ComputePositionBasedOnVerletIntegration(body, timeStep);
-            }
+            ComputePositionBasedOnVerletIntegration(timeStep);
+            ComputePositionBasedOnVerletIntegration(timeStep);
         }
     }
 }

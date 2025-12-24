@@ -15,6 +15,7 @@ namespace NBodyProblemSimulation
         private Timer timer;
         private DateTime lastFrameTime;
         private Label lblTime;
+        private Label lblStarCount;
         private Button btnAddStar;
         private float simulationTime = 0f;
 
@@ -36,11 +37,23 @@ namespace NBodyProblemSimulation
             lblTime.BringToFront();
             Controls.Add(lblTime);
 
+            // Star count label
+            lblStarCount = new Label
+            {
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Location = new Point(10, 30),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Regular),
+                Text = $"Stars counter: {physicsEngine.Bodies.Count}"
+            };
+            Controls.Add(lblStarCount);
+
             // Add star button
             btnAddStar = new Button
             {
                 Text = "Add Star",
-                Location = new Point(10, 40),
+                Location = new Point(10, 50),
             };
             btnAddStar.Click += BtnAddStar_Click;
             btnAddStar.BackColor = Color.DarkGray;
@@ -48,13 +61,13 @@ namespace NBodyProblemSimulation
             Controls.Add(btnAddStar);
 
             // Initialize Physics Engine with a test scenario
-            physicsEngine.PythagoreanThreeBodyTest();
+            physicsEngine.EightShapeTest();
 
             // Add a button to toggle acceleration vector visibility
             Button btnToggleAccelerationVectors = new Button
             {
                 Text = "Toggle Acceleration Vectors",
-                Location = new Point(10, 70),
+                Location = new Point(10, 80),
             };
             btnToggleAccelerationVectors.BackColor = Color.DarkGray;
             btnToggleAccelerationVectors.ForeColor = Color.White;
@@ -67,7 +80,7 @@ namespace NBodyProblemSimulation
 
             // Timer setup
             timer = new Timer();
-            timer.Interval = 16; // 60 FPS
+            timer.Interval = 8; // 60 FPS
             timer.Tick += Timer_Tick;
             timer.Start();
 
@@ -87,13 +100,15 @@ namespace NBodyProblemSimulation
             lastFrameTime = now;
 
             // Update Physics
-            float timeStep = (float)(3.154e+7 / 32); // Fraction of a year in seconds
+            //float timeStep = (float)(3.154e+7 / 32); // Fraction of a year in seconds
+            float timeStep = 0.5f; // Number of years per frame 
             physicsEngine.Update(timeStep);
 
 
-            // Update sim timer
+            // Update sim labels
             simulationTime += deltaTime;
             lblTime.Text = $"Time: {simulationTime:F1} s";
+            lblStarCount.Text = $"Stars counter: {physicsEngine.Bodies.Count}";
 
             Invalidate(); // cause repaint
         }

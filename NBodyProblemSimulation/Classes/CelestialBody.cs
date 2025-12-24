@@ -7,9 +7,10 @@ namespace NBodyProblemSimulation.Classes
         // Properties
         public string Name { get; set; }
         public double Mass { get; set; } // Real astronomical mass in solar mass, the mass of the sun is 1.989e30 kg || Therefore, 1 solar mass = 1.989e30 kg
-        public Vector2 Position { get; set; } // Uses astronomical units ( 1 AU = 150 milion km)
-        public Vector2 Velocity { get; set; }
+        public Vector2 Position { get; set; } // Uses astronomical units ( 1 AU = 150 million km)
+        public Vector2 Velocity { get; set; } // AU / Timestep (Timestep is in years)
         public Vector2 Acceleration { get; set; }
+        public Vector2 OldAcceleration { get; set; } // Needed for Verlet Integration
         public float Radius { get; set; }
         public List<Vector2> Trail { get; set; }
         public Color ColorHex { get; set; }
@@ -22,6 +23,7 @@ namespace NBodyProblemSimulation.Classes
             Position = position;
             Velocity = velocity;
             Acceleration = acceleration;
+            OldAcceleration = acceleration;
             Radius = radius;
             Trail = new List<Vector2>();
             ColorHex = colorHex;
