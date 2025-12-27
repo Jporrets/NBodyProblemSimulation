@@ -9,13 +9,17 @@ namespace NBodyProblemSimulation
     {
         // Variables
         private PhysicsEngine physicsEngine = new PhysicsEngine();
-        private int starCount = 0;
         private bool showAccelerationVector = true;
+        private float integrationDelta = 10f; // Number of years per frame
 
+        private TrackBar integrationTrackbar;
         private Timer timer;
         private DateTime lastFrameTime;
         private Label lblTime;
         private Label lblStarCount;
+        private Label lblScenario;
+        private Label lblIntegrationMethod;
+        private Label lblIntegrationDelta;
         private Button btnAddStar;
         private float simulationTime = 0f;
 
@@ -28,7 +32,7 @@ namespace NBodyProblemSimulation
             lblTime = new Label
             {
                 ForeColor = Color.White,
-                Location = new Point(10, 10),
+                Location = new Point(10, 30),
                 AutoSize = true,
                 Font = new Font("Arial", 12, FontStyle.Bold)
             };
@@ -42,7 +46,7 @@ namespace NBodyProblemSimulation
             {
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
-                Location = new Point(10, 30),
+                Location = new Point(10, 50),
                 AutoSize = true,
                 Font = new Font("Arial", 10, FontStyle.Regular),
                 Text = $"Stars counter: {physicsEngine.Bodies.Count}"
@@ -53,21 +57,18 @@ namespace NBodyProblemSimulation
             btnAddStar = new Button
             {
                 Text = "Add Star",
-                Location = new Point(10, 50),
+                Location = new Point(10, 70),
             };
             btnAddStar.Click += BtnAddStar_Click;
             btnAddStar.BackColor = Color.DarkGray;
             btnAddStar.ForeColor = Color.White;
             Controls.Add(btnAddStar);
 
-            // Initialize Physics Engine with a test scenario
-            physicsEngine.EightShapeTest();
-
             // Add a button to toggle acceleration vector visibility
             Button btnToggleAccelerationVectors = new Button
             {
                 Text = "Toggle Acceleration Vectors",
-                Location = new Point(10, 80),
+                Location = new Point(10, 90),
             };
             btnToggleAccelerationVectors.BackColor = Color.DarkGray;
             btnToggleAccelerationVectors.ForeColor = Color.White;
@@ -78,6 +79,88 @@ namespace NBodyProblemSimulation
             };
             Controls.Add(btnToggleAccelerationVectors);
 
+            // Add a button to switch scenarios
+            Button btnSwitchScenario = new Button
+            {
+                Text = "Switch Scenario",
+                Location = new Point(10, 110),
+                BackColor = Color.DarkGray,
+                ForeColor = Color.White
+            };
+            btnSwitchScenario.Click += (s, e) =>
+            {
+                physicsEngine.SwitchScenario();
+                simulationTime = 0f; // Reset simulation time
+                Invalidate();
+            };
+            Controls.Add(btnSwitchScenario);
+
+            // Label to show current scenario
+            lblScenario = new Label
+            {
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Location = new Point(10, 130),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Regular),
+                Text = $"Scenario number: {physicsEngine.ScenarioIndex + 1}"
+            };
+            Controls.Add(lblScenario);
+
+            // Add a button to switch integration methods
+            Button btnSwitchIntegration = new Button
+            {
+                Text = "Switch Integrator",
+                Location = new Point(10, 160),
+                BackColor = Color.DarkGray,
+                ForeColor = Color.White
+            };
+            btnSwitchIntegration.Click += (s, e) =>
+            {
+                physicsEngine.SwitchIntegrationMethod();
+                Invalidate();
+            };
+            Controls.Add(btnSwitchIntegration);
+
+            // Label to show integration method
+            lblIntegrationMethod = new Label
+            {
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Location = new Point(10, 180),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Regular),
+                Text = $"Integration method: {physicsEngine.CurrentIntegrationMethodName}"
+            };
+            Controls.Add(lblIntegrationMethod);
+
+            // Trackbar to show integration delta
+            integrationTrackbar = new TrackBar
+            {
+                Minimum = 1,
+                Maximum = 500,
+                Value = 50,
+                TickFrequency = 100,
+                Dock = DockStyle.Top,
+            };
+            integrationTrackbar.Scroll += TrackBar_Scroll;
+            Controls.Add(integrationTrackbar);
+
+            // Add label to display the integration delta
+            lblIntegrationDelta = new Label
+            {
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Location = new Point(10, 200),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Regular),
+                Text = $"Integration Delta: {integrationTrackbar.Value / 10.0f:F1} years"
+            };
+            Controls.Add(lblIntegrationDelta);
+
+            // Initialize Physics Engine with the first scenario
+            physicsEngine.LoadFirstScenario();
+
             // Timer setup
             timer = new Timer();
             timer.Interval = 8; // 60 FPS
@@ -86,6 +169,15 @@ namespace NBodyProblemSimulation
 
             lastFrameTime = DateTime.Now;
             DoubleBuffered = true;
+        }
+
+        private void TrackBar_Scroll(object? sender, EventArgs e)
+        {
+            // Map the TrackBar value (1-500) to a float value (0.1 to 50.0 years)
+            integrationDelta = integrationTrackbar.Value / 10.0f;
+
+            // Update the label to show the new integration delta
+            lblIntegrationDelta.Text = $"Integration Delta: {integrationDelta:F1} years";
         }
 
         private void BtnAddStar_Click(object? sender, EventArgs e)
@@ -100,8 +192,7 @@ namespace NBodyProblemSimulation
             lastFrameTime = now;
 
             // Update Physics
-            //float timeStep = (float)(3.154e+7 / 32); // Fraction of a year in seconds
-            float timeStep = 0.5f; // Number of years per frame 
+            float timeStep = integrationDelta;
             physicsEngine.Update(timeStep);
 
 
@@ -109,6 +200,8 @@ namespace NBodyProblemSimulation
             simulationTime += deltaTime;
             lblTime.Text = $"Time: {simulationTime:F1} s";
             lblStarCount.Text = $"Stars counter: {physicsEngine.Bodies.Count}";
+            lblScenario.Text = $"Scenario number: {physicsEngine.ScenarioIndex + 1}";
+            lblIntegrationMethod.Text = $"Integration method: {physicsEngine.CurrentIntegrationMethodName}";
 
             Invalidate(); // cause repaint
         }

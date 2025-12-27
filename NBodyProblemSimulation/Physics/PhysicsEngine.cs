@@ -1,12 +1,18 @@
 ﻿using NBodyProblemSimulation.Classes;
+using NBodyProblemSimulation.Utils;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace NBodyProblemSimulation.Physics
 {
     internal class PhysicsEngine
     {
         public List<CelestialBody> Bodies { get;  } = new();
-        public double gravitationalConstant = 4 * Math.Pow( Math.PI, 2); // This is the gravitational constant in AU^3 / (Solar Mass * Year^2)
+        public int ScenarioIndex = 0;
+        public double GravitationalConstant = 4 * Math.Pow( Math.PI, 2); // This is the gravitational constant in AU^3 / (Solar Mass * Year^2)
+        public int IntegrationMethodIndex = 1; // Default to Verlet Integration
+        public string CurrentIntegrationMethodName = "Verlet Integration";
+        Scenarios scenarios = new Scenarios();
 
         // Initializers
 
@@ -29,89 +35,70 @@ namespace NBodyProblemSimulation.Physics
             Bodies.Add(sun);
         }
 
+        public void ClearBodies()
+        {
+            Bodies.Clear();
+        }
+
+        public void SwitchScenario()
+        {
+            // Set variables
+            ScenarioIndex++;
+            ClearBodies();
+
+            // Load scenario
+
+            if (scenarios.ScenarioDict.ContainsKey(ScenarioIndex))
+            {
+                scenarios.ScenarioDict[ScenarioIndex]().ForEach(body => AddBody(body));
+            }
+            else
+            {
+                ScenarioIndex = 0;
+                scenarios.ScenarioDict[ScenarioIndex]().ForEach(body => AddBody(body));
+            }
+        }
+
+        public void LoadFirstScenario()
+        {
+            Scenarios scenarios = new Scenarios();
+            scenarios.ScenarioDict[ScenarioIndex]().ForEach(body => AddBody(body));
+
+            // DragonFlyThreeBodyTest();
+        }
+
+        public void ResetSimulation()
+        {
+            ClearBodies();
+            
+            if (scenarios.ScenarioDict.ContainsKey(ScenarioIndex))
+            {
+                scenarios.ScenarioDict[ScenarioIndex]().ForEach(body => AddBody(body));
+            }
+            else
+            {
+                ScenarioIndex = 0;
+                scenarios.ScenarioDict[ScenarioIndex]().ForEach(body => AddBody(body));
+            }
+
+        }
+
         // Test Setups
-
-        public void TwoBodyOrbitTest()
-        {
-            CelestialBody Star1 = new CelestialBody(
-                name: "Star 1",
-                mass: 1,
-                position: new Vector2(100, 100),
-                velocity: new Vector2((float)-5.1E-02, (float)5.7847E-02),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.Yellow
-            );
-            CelestialBody Star2 = new CelestialBody(
-                name: "Star 2",
-                mass: 1,
-                position: new Vector2(1200, 600),
-                velocity: new Vector2((float)5.1E-02, (float)-5.7847E-02),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.OrangeRed
-            );
-
-            Bodies.Add(Star1);
-            Bodies.Add(Star2);
-        }
-
-        public void PythagoreanThreeBodyTest()
-        {
-            /*
-             * This method sets up a three-body system in a Pythagorean configuration.
-             * This configuration was first described by Meissel in 1893.
-             * It consists of three bodies placed at the vertices of a right triangle with precise variables:
-             * Three masses in the ratio 3:4:5 are placed at rest at the vertices of a 3:4:5 right triangle.
-             * With the heaviest body at the right angle and the lightest at the smaller acute angle.
-             */
-
-            CelestialBody Star1 = new CelestialBody(
-                name: "Star 1",
-                mass: 3,
-                position: new Vector2(300, 800),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.OrangeRed
-                );
-            CelestialBody Star2 = new CelestialBody(
-                name: "Star 2",
-                mass: 5,
-                position: new Vector2(1100, 800),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.LightSteelBlue
-                );
-            CelestialBody Star3 = new CelestialBody(
-                name: "Star 3",
-                mass: 4,
-                position: new Vector2(300, 200),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.YellowGreen
-                );
-
-            Bodies.Add(Star1);
-            Bodies.Add(Star2);
-            Bodies.Add(Star3);
-        }
 
         public void DragonFlyThreeBodyTest()
         {
             /*
             * This method sets up a three-body system in a DragonFly configuration.
-            * This configuration was discovered by Li and Liao in 2020.
+            * This configuration was discovered by Li and Liao in 2012.
             * It consists of three bodies following a periodic orbit that resembles the shape of a dragonfly.
             */
 
+            float scalingFactor = 2 * (float)Math.PI * 1e-1f;
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(750,500),
-                velocity: new Vector2((float)0.080584, (float) 0.588836),
+                position: new Vector2(900f - 100f,500f),
+                velocity: new Vector2(0.080584f * scalingFactor, 0.588836f *scalingFactor),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
@@ -119,8 +106,8 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(1050, 500),
-                velocity: new Vector2((float)0.080584, (float)0.588836),
+                position: new Vector2(900f + 100f, 500f),
+                velocity: new Vector2(0.080584f * scalingFactor, 0.588836f * scalingFactor),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
@@ -128,8 +115,43 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(900, 500),
-                velocity: new Vector2((float) -0.161168, (float) -1.177672),
+                position: new Vector2(900f, 500f),
+                velocity: new Vector2(0.161168f * scalingFactor, -1.177672f * scalingFactor),
+                acceleration: new Vector2(0, 0),
+                radius: 5,
+                colorHex: Color.LimeGreen
+                );
+
+            Bodies.Add(Star1);
+            Bodies.Add(Star2);
+            Bodies.Add(Star3);
+        } // Maybe works but needs more precise integration
+        public void ButterflyTest()
+        {
+
+            CelestialBody Star1 = new CelestialBody(
+                name: "Star 1",
+                mass: 1,
+                position: new Vector2(900f, 500f),
+                velocity: new Vector2(0, 2.181e-1f),
+                acceleration: new Vector2(0, 0),
+                radius: 5,
+                colorHex: Color.OrangeRed
+                );
+            CelestialBody Star2 = new CelestialBody(
+                name: "Star 2",
+                mass: 1,
+                position: new Vector2(900f + 100f, 500f),
+                velocity: new Vector2(-1.091e-1f, -1.091e-1f),
+                acceleration: new Vector2(0, 0),
+                radius: 5,
+                colorHex: Color.Azure
+                );
+            CelestialBody Star3 = new CelestialBody(
+                name: "Star 3",
+                mass: 1,
+                position: new Vector2(900f - 100f, 500f),
+                velocity: new Vector2(-1.091e-1f, -1.091e-1f),
                 acceleration: new Vector2(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
@@ -140,48 +162,7 @@ namespace NBodyProblemSimulation.Physics
             Bodies.Add(Star3);
         } // Doesn't work
 
-        public void EightShapeTest()
-        {
-            /*
-             * This method sets up a three-body system in a figure-eight configuration.
-             * This configuration was discovered by Moore in 1993.
-             * It consists of three bodies of equal mass following a periodic orbit that traces out a figure-eight shape.
-             */
-            CelestialBody Star1 = new CelestialBody(
-                name: "Star 1",
-                mass: 1,
-                position: new Vector2(700f - 97.000436f, 500f + 24.308753f),
-                velocity: new Vector2((float)(0.466203685), (float)(0.432365730)),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.OrangeRed
-                );
-            CelestialBody Star2 = new CelestialBody(
-                name: "Star 2",
-                mass: 1,
-                position: new Vector2(700f + 97.000436f, 500f - 24.308753f),
-                velocity: new Vector2((float)(0.466203685), (float)(0.432365730)),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.Azure
-                );
-            CelestialBody Star3 = new CelestialBody(
-                name: "Star 3",
-                mass: 1,
-                position: new Vector2(700f, 500f),
-                velocity: new Vector2((float)(-0.932407370), (float)(-0.864731460)),
-                acceleration: new Vector2(0, 0),
-                radius: 5,
-                colorHex: Color.LimeGreen
-                );
-            Bodies.Add(Star1);
-            Bodies.Add(Star2);
-            Bodies.Add(Star3);
-        } // Not works
-
-        
-
-        // Methods
+        // Physics Methods
 
         public void ComputeAcceleration(CelestialBody body, double eps = 1e-3)
         {
@@ -204,37 +185,39 @@ namespace NBodyProblemSimulation.Physics
                 double distance = Math.Sqrt((body.Position - otherBody.Position).LengthSquared() + eps * eps); // The distance is softened to avoid short distance infinite forces
                 double invertedDistanceCube = 1.0 / Math.Pow(distance, 3); // 1/r^3
 
-                float factor = (float)(gravitationalConstant * otherBody.Mass * invertedDistanceCube);
+                float factor = (float)(GravitationalConstant * otherBody.Mass * invertedDistanceCube);
                 Vector2 acceleration = displacementVector * factor;
                 body.Acceleration += acceleration;
             }   
         }
 
-        public void ComputePositionBasedOnAccelerationEulersMethod(CelestialBody body, float timeStep)
+        public void ComputePositionBasedOnAccelerationEulersMethod(float timeStep)
         {
             /*
              * This method uses Euler's method to update the position and velocity of a celestial body.
              * Euler's method is a simple numerical procedure for solving ordinary differential equations (ODEs) with a given initial value.
              * In this context, it updates the position and velocity of a celestial body based on its acceleration and the time step.
              */
-            if (body.Trail.Count > 500)
+
+            foreach(CelestialBody body in Bodies)
             {
-                body.Trail.RemoveAt(0);
+                if (body.Trail.Count > body.TrailLength)
+                {
+                    body.Trail.RemoveAt(0);
+                }
+
+                //
+                ComputeAcceleration(body);
+                body.Velocity = body.Velocity + body.Acceleration * timeStep;
+                body.Trail.Add(body.Position);
+                body.Position += body.Velocity * timeStep;
             }
-
-            //
-            ComputeAcceleration(body);
-            body.Velocity = body.Velocity + body.Acceleration * timeStep;
-            body.Trail.Add(body.Position);
-            body.Position += body.Velocity * timeStep;
-
-
         }
 
         public void ComputePositionBasedOnVerletIntegration(float timeStep)
         {
             /*
-             * This method uses the Velocity Verlet integration algorithm to update the position and velocity of a celestial body. //////////////////////
+             * This method uses the Velocity Verlet integration algorithm to update the position and velocity of celestial bodies.
              * The Verlet method updates the position of an object based on its previous position,
              * its current acceleration (which is related to the force acting on it), and the time step.
              */
@@ -249,7 +232,7 @@ namespace NBodyProblemSimulation.Physics
 
             foreach (CelestialBody body in Bodies)
             {
-                if (body.Trail.Count > 500)
+                if (body.Trail.Count > body.TrailLength)
                 {
                     body.Trail.RemoveAt(0);
                 }
@@ -276,12 +259,84 @@ namespace NBodyProblemSimulation.Physics
                 //System.Diagnostics.Debug.WriteLine($"Body: {body.Name} || New Position: {body.Position} || New Velocity: {body.Velocity} || Acceleration: {body.Acceleration}");
             }
         }
-        
-        // Temp Func
+
+        public void ComputePositionBasedOnYoshidaFourthOrder(float timeStep)
+        {
+            /*
+             * This method uses the Fourth-Order Yoshida integration algorithm to update the position and velocity of celestial bodies.
+             * The Yoshida method is a symplectic integrator that provides higher accuracy for simulating Hamiltonian systems, such as gravitational interactions.
+             * It involves multiple sub-steps to update positions and velocities, ensuring better conservation of energy and momentum over long simulations.
+             * Provides better performance compared to Velocity Verlet integration.
+             */
+            float cbrt2 = MathF.Pow(2f, 1f / 3f);
+            float a1 = 1f / (2f * (2f - cbrt2));
+            float a2 = (1f - cbrt2) / (2f * (2f - cbrt2));
+
+            ComputePositionBasedOnVerletIntegration(a1 * timeStep);
+            ComputePositionBasedOnVerletIntegration(a2 * timeStep);
+            ComputePositionBasedOnVerletIntegration(a1 * timeStep);
+        }
+
+        public void ComputePositionBasedOnRungeKuttaFourthOrder(float timeStep)
+        {
+            /*
+             * This method uses the Fourth-Order Runge-Kutta integration algorithm to update the position and velocity of celestial bodies.
+             * The Runge-Kutta method is a widely used numerical technique for solving ordinary differential equations (ODEs).
+             * It provides a good balance between accuracy and computational efficiency, making it suitable for simulating complex systems like gravitational interactions.
+             */
+            
+            
+        }
+
+        // Update Function
+
+        public void SwitchIntegrationMethod()
+        {
+            IntegrationMethodIndex++;
+            if (IntegrationMethodIndex > 2)
+            {
+                IntegrationMethodIndex = 0;
+            }
+
+            // Reset simulation to avoid instability when switching methods
+            ResetSimulation();
+
+            // Update current scenario name
+            switch (IntegrationMethodIndex)
+            {
+                case 0:
+                    CurrentIntegrationMethodName = "Euler's Method";
+                    break;
+                case 1:
+                    CurrentIntegrationMethodName = "Verlet Integration";
+                    break;
+                case 2:
+                    CurrentIntegrationMethodName = "Yoshida Fourth Order";
+                    break;
+                default:
+                    CurrentIntegrationMethodName = "Verlet Integration";
+                    break;
+            }
+
+        }
+
         public void Update(float timeStep)
         {
-            ComputePositionBasedOnVerletIntegration(timeStep);
-            ComputePositionBasedOnVerletIntegration(timeStep);
+            switch (IntegrationMethodIndex)
+            {
+                case 0:
+                    ComputePositionBasedOnAccelerationEulersMethod(timeStep);
+                    break;
+                case 1:
+                    ComputePositionBasedOnVerletIntegration(timeStep);
+                    break;
+                case 2:
+                    ComputePositionBasedOnYoshidaFourthOrder(timeStep);
+                    break;
+                default:
+                    ComputePositionBasedOnVerletIntegration(timeStep);
+                    break;
+            }
         }
     }
 }

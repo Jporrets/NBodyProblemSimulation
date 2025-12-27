@@ -13,6 +13,7 @@ namespace NBodyProblemSimulation.Classes
         public Vector2 OldAcceleration { get; set; } // Needed for Verlet Integration
         public float Radius { get; set; }
         public List<Vector2> Trail { get; set; }
+        public int TrailLength { get; set; } // Default trail length
         public Color ColorHex { get; set; }
 
         // Constructor
@@ -26,6 +27,7 @@ namespace NBodyProblemSimulation.Classes
             OldAcceleration = acceleration;
             Radius = radius;
             Trail = new List<Vector2>();
+            TrailLength = 1000;
             ColorHex = colorHex;
         }
     }
