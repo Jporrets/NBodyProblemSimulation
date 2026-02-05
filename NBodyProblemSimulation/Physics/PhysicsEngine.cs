@@ -191,7 +191,7 @@ namespace NBodyProblemSimulation.Physics
             }   
         }
 
-        public void ComputePositionBasedOnAccelerationEulersMethod(float timeStep)
+        public void ComputePositionBasedOnAccelerationEulersMethod(float timeStep, bool shouldRecordTrail)
         {
             /*
              * This method uses Euler's method to update the position and velocity of a celestial body.
@@ -209,12 +209,15 @@ namespace NBodyProblemSimulation.Physics
                 //
                 ComputeAcceleration(body);
                 body.Velocity = body.Velocity + body.Acceleration * timeStep;
-                body.Trail.Add(body.Position);
+                
+                if ( shouldRecordTrail)
+                    body.Trail.Add(body.Position);
+
                 body.Position += body.Velocity * timeStep;
             }
         }
 
-        public void ComputePositionBasedOnVerletIntegration(float timeStep)
+        public void ComputePositionBasedOnVerletIntegration(float timeStep, bool shouldRecordTrail)
         {
             /*
              * This method uses the Velocity Verlet integration algorithm to update the position and velocity of celestial bodies.
@@ -239,7 +242,9 @@ namespace NBodyProblemSimulation.Physics
 
                 //
                 Vector2 initialPosition = body.Position;
-                body.Trail.Add(initialPosition);
+
+                if (shouldRecordTrail)
+                    body.Trail.Add(initialPosition);
 
                 body.Position += body.Velocity * timeStep + 0.5f * body.Acceleration * timeStep * timeStep;
             }
@@ -254,13 +259,10 @@ namespace NBodyProblemSimulation.Physics
 
                 body.Velocity += 0.5f * (body.OldAcceleration + body.Acceleration) * timeStep; // Update velocity using average acceleration
 
-
-                // DEBUG
-                //System.Diagnostics.Debug.WriteLine($"Body: {body.Name} || New Position: {body.Position} || New Velocity: {body.Velocity} || Acceleration: {body.Acceleration}");
             }
         }
 
-        public void ComputePositionBasedOnYoshidaFourthOrder(float timeStep)
+        public void ComputePositionBasedOnYoshidaFourthOrder(float timeStep, bool shouldRecordTrail)
         {
             /*
              * This method uses the Fourth-Order Yoshida integration algorithm to update the position and velocity of celestial bodies.
@@ -272,12 +274,12 @@ namespace NBodyProblemSimulation.Physics
             float a1 = 1f / (2f * (2f - cbrt2));
             float a2 = (1f - cbrt2) / (2f * (2f - cbrt2));
 
-            ComputePositionBasedOnVerletIntegration(a1 * timeStep);
-            ComputePositionBasedOnVerletIntegration(a2 * timeStep);
-            ComputePositionBasedOnVerletIntegration(a1 * timeStep);
+            ComputePositionBasedOnVerletIntegration(a1 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
+            ComputePositionBasedOnVerletIntegration(a2 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
+            ComputePositionBasedOnVerletIntegration(a1 * timeStep, shouldRecordTrail);
         }
 
-        public void ComputePositionBasedOnRungeKuttaFourthOrder(float timeStep)
+        public void ComputePositionBasedOnRungeKuttaFourthOrder(float timeStep, bool shouldRecordTrail)
         {
             /*
              * This method uses the Fourth-Order Runge-Kutta integration algorithm to update the position and velocity of celestial bodies.
@@ -320,21 +322,21 @@ namespace NBodyProblemSimulation.Physics
 
         }
 
-        public void Update(float timeStep)
+        public void Update(float timeStep, bool shouldRecordTrail)
         {
             switch (IntegrationMethodIndex)
             {
                 case 0:
-                    ComputePositionBasedOnAccelerationEulersMethod(timeStep);
+                    ComputePositionBasedOnAccelerationEulersMethod(timeStep, shouldRecordTrail);
                     break;
                 case 1:
-                    ComputePositionBasedOnVerletIntegration(timeStep);
+                    ComputePositionBasedOnVerletIntegration(timeStep, shouldRecordTrail);
                     break;
                 case 2:
-                    ComputePositionBasedOnYoshidaFourthOrder(timeStep);
+                    ComputePositionBasedOnYoshidaFourthOrder(timeStep, shouldRecordTrail);
                     break;
                 default:
-                    ComputePositionBasedOnVerletIntegration(timeStep);
+                    ComputePositionBasedOnVerletIntegration(timeStep, shouldRecordTrail);
                     break;
             }
         }

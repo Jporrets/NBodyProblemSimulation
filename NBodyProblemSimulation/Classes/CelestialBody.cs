@@ -27,7 +27,7 @@ namespace NBodyProblemSimulation.Classes
             OldAcceleration = acceleration;
             Radius = radius;
             Trail = new List<Vector2>();
-            TrailLength = 1000;
+            TrailLength = 200;
             ColorHex = colorHex;
         }
     }

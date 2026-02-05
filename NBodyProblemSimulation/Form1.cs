@@ -21,6 +21,7 @@ namespace NBodyProblemSimulation
         private Label lblIntegrationMethod;
         private Label lblIntegrationDelta;
         private Button btnAddStar;
+        private Bitmap? _backgroundCache = null;
         private float simulationTime = 0f;
 
         public Form1()
@@ -193,7 +194,13 @@ namespace NBodyProblemSimulation
 
             // Update Physics
             float timeStep = integrationDelta;
-            physicsEngine.Update(timeStep);
+            float targetTimeStep = 0.01f;
+            int RequiredSubSteps = (int) Math.Ceiling(timeStep / targetTimeStep);
+
+            for (int i = 0; i < RequiredSubSteps; i++)
+            {
+                physicsEngine.Update(targetTimeStep, i == 0 || i == (RequiredSubSteps / 2) );
+            }
 
 
             // Update sim labels
@@ -208,65 +215,103 @@ namespace NBodyProblemSimulation
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
-
+            // 1. Setup Graphics
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Background Graphics
-            using (var path = new GraphicsPath())
+            // 2. Draw Background (Cached)
+            if (_backgroundCache == null || _backgroundCache.Width != ClientSize.Width || _backgroundCache.Height != ClientSize.Height)
             {
-                path.AddEllipse(-ClientSize.Width / 2, -ClientSize.Height / 2, ClientSize.Width * 2, ClientSize.Height * 2);
-
-                using (var brush = new PathGradientBrush(path))
+                _backgroundCache = new Bitmap(Math.Max(1, ClientSize.Width), Math.Max(1, ClientSize.Height));
+                using (var bgG = Graphics.FromImage(_backgroundCache))
+                using (var path = new GraphicsPath())
                 {
-                    brush.CenterColor = Color.FromArgb(30, 30, 60);   // center
-                    brush.SurroundColors = new[] { Color.Black };     // edges
-
-                    g.FillRectangle(brush, ClientRectangle);
+                    path.AddEllipse(-Width / 2, -Height / 2, Width * 2, Height * 2);
+                    using (var brush = new PathGradientBrush(path))
+                    {
+                        brush.CenterColor = Color.FromArgb(30, 30, 60);
+                        brush.SurroundColors = new[] { Color.Black };
+                        bgG.FillRectangle(brush, ClientRectangle);
+                    }
                 }
             }
+            // Blit the cached image (Instant operation)
+            g.DrawImageUnscaled(_backgroundCache, 0, 0);
 
-            // Loop through stars to draw
+
+            // 3. Draw Stars
             foreach (CelestialBody star in physicsEngine.Bodies)
             {
-                // Draw star trail
-                for (int i = 0; i < star.Trail.Count - 1; i++)
+                // --- OPTIMIZED TRAIL DRAWING ---
+                // Instead of 1000 DrawLine calls, we do ~10 DrawLines calls (Batches)
+                if (star.Trail.Count > 1)
                 {
-                    // Fade trail: older points are more transparent
-                    float alpha = (float)i / star.Trail.Count;
-                    using (var pen = new Pen(Color.FromArgb((int)(alpha * 255), star.ColorHex)))
+                    int batches = 10; // Divide trail into 10 transparency segments
+                    int pointsPerBatch = star.Trail.Count / batches;
+
+                    if (pointsPerBatch > 1)
                     {
-                        g.DrawLine(pen,
-                            star.Trail[i].X + star.Radius,
-                            star.Trail[i].Y + star.Radius,
-                            star.Trail[i + 1].X + star.Radius,
-                            star.Trail[i + 1].Y + star.Radius);
+                        for (int b = 0; b < batches; b++)
+                        {
+                            // Calculate opacity for this entire batch
+                            float alphaPct = (float)b / batches;
+                            int alpha = (int)(alphaPct * 255);
+                            if (alpha < 5) continue; // Skip invisible parts
+
+                            // Create points for this segment
+                            int startIndex = b * pointsPerBatch;
+                            // Ensure batches overlap by 1 point so there are no gaps
+                            int count = (b == batches - 1) ? (star.Trail.Count - startIndex) : (pointsPerBatch + 1);
+
+                            if (count < 2) continue;
+
+                            PointF[] batchPoints = new PointF[count];
+                            for (int j = 0; j < count; j++)
+                            {
+                                var vec = star.Trail[startIndex + j];
+                                // Apply Offset directly here
+                                batchPoints[j] = new PointF(vec.X + star.Radius, vec.Y + star.Radius);
+                            }
+
+                            using (var pen = new Pen(Color.FromArgb(alpha, star.ColorHex), 1.5f))
+                            {
+                                g.DrawLines(pen, batchPoints);
+                            }
+                        }
                     }
                 }
 
-                // Star Graphics
-                // Draw glow layers
-                int glowLayers = 3;
-                for (int i = glowLayers; i > 0; i--)
+                // --- STAR GLOW & BODY ---
+                // (Optimized: Removed repeated math)
+                float sX = star.Position.X;
+                float sY = star.Position.Y;
+
+                // Draw glow (Outer to Inner)
+                for (int i = 3; i > 0; i--)
                 {
-                    int glowRadius = (int)(star.Radius * 2.0 + i * 6); // larger than star
-                    int alpha = 50 / i; // outer layers more transparent
-                    using (var brush = new SolidBrush(Color.FromArgb(alpha, star.ColorHex)))
+                    int glowSize = (int)(star.Radius * 2 + i * 6);
+                    int offset = (glowSize - (int)(star.Radius * 2)) / 2;
+
+                    using (var brush = new SolidBrush(Color.FromArgb(50 / i, star.ColorHex)))
                     {
-                        g.FillEllipse(brush,
-                            star.Position.X + star.Radius - glowRadius / 2,
-                            star.Position.Y + star.Radius - glowRadius / 2,
-                            glowRadius,
-                            glowRadius);
+                        g.FillEllipse(brush, sX - offset, sY - offset, glowSize, glowSize);
                     }
                 }
 
+                // Draw solid body
                 using (var brush = new SolidBrush(star.ColorHex))
                 {
-                    g.FillEllipse(brush, star.Position.X, star.Position.Y, star.Radius * 2, star.Radius * 2);
+                    g.FillEllipse(brush, sX, sY, star.Radius * 2, star.Radius * 2);
                 }
             }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            _backgroundCache?.Dispose();
+            _backgroundCache = null;
+            Invalidate();
         }
     }
 }
