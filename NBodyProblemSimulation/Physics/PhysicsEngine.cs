@@ -1,7 +1,6 @@
 ﻿using NBodyProblemSimulation.Classes;
 using NBodyProblemSimulation.Utils;
-using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
+using static NBodyProblemSimulation.Utils.CustomVector2d;
 
 namespace NBodyProblemSimulation.Physics
 {
@@ -26,9 +25,9 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody sun = new CelestialBody(
                 name: "Sun",
                 mass: 1,
-                position: new Vector2(500, 500),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(500, 500),
+                velocity: new Vector2d(0, 0),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Yellow
             );
@@ -97,27 +96,27 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(900f - 100f,500f),
-                velocity: new Vector2(0.080584f * scalingFactor, 0.588836f *scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f - 100f,500f),
+                velocity: new Vector2d(0.080584f * scalingFactor, 0.588836f *scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
                 );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(900f + 100f, 500f),
-                velocity: new Vector2(0.080584f * scalingFactor, 0.588836f * scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f + 100f, 500f),
+                velocity: new Vector2d(0.080584f * scalingFactor, 0.588836f * scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
                 );
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(900f, 500f),
-                velocity: new Vector2(0.161168f * scalingFactor, -1.177672f * scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f, 500f),
+                velocity: new Vector2d(0.161168f * scalingFactor, -1.177672f * scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
                 );
@@ -132,27 +131,27 @@ namespace NBodyProblemSimulation.Physics
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(900f, 500f),
-                velocity: new Vector2(0, 2.181e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f, 500f),
+                velocity: new Vector2d(0, 2.181e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
                 );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(900f + 100f, 500f),
-                velocity: new Vector2(-1.091e-1f, -1.091e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f + 100f, 500f),
+                velocity: new Vector2d(-1.091e-1f, -1.091e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
                 );
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(900f - 100f, 500f),
-                velocity: new Vector2(-1.091e-1f, -1.091e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f - 100f, 500f),
+                velocity: new Vector2d(-1.091e-1f, -1.091e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
                 );
@@ -173,7 +172,7 @@ namespace NBodyProblemSimulation.Physics
              */
 
             // Reset acceleration
-            body.Acceleration = Vector2.Zero;
+            body.Acceleration = Vector2d.Zero;
 
             // Compute new acceleration
             foreach (CelestialBody otherBody in Bodies)
@@ -181,12 +180,12 @@ namespace NBodyProblemSimulation.Physics
                 if (body == otherBody) continue;
 
                 // Calculate gravitational force based on Newton's law of universal gravitation
-                Vector2 displacementVector = (body.Position - otherBody.Position) * -1; // We apply a negative sign to get the vector pointing from body to otherBody
+                Vector2d displacementVector = (body.Position - otherBody.Position) * -1; // We apply a negative sign to get the vector pointing from body to otherBody
                 double distance = Math.Sqrt((body.Position - otherBody.Position).LengthSquared() + eps * eps); // The distance is softened to avoid short distance infinite forces
                 double invertedDistanceCube = 1.0 / Math.Pow(distance, 3); // 1/r^3
 
                 float factor = (float)(GravitationalConstant * otherBody.Mass * invertedDistanceCube);
-                Vector2 acceleration = displacementVector * factor;
+                Vector2d acceleration = displacementVector * factor;
                 body.Acceleration += acceleration;
             }   
         }
@@ -210,7 +209,7 @@ namespace NBodyProblemSimulation.Physics
                 ComputeAcceleration(body);
                 body.Velocity = body.Velocity + body.Acceleration * timeStep;
                 
-                if ( shouldRecordTrail)
+                if (shouldRecordTrail)
                     body.Trail.Add(body.Position);
 
                 body.Position += body.Velocity * timeStep;
@@ -241,7 +240,7 @@ namespace NBodyProblemSimulation.Physics
                 }
 
                 //
-                Vector2 initialPosition = body.Position;
+                Vector2d initialPosition = body.Position;
 
                 if (shouldRecordTrail)
                     body.Trail.Add(initialPosition);
@@ -271,12 +270,13 @@ namespace NBodyProblemSimulation.Physics
              * Provides better performance compared to Velocity Verlet integration.
              */
             float cbrt2 = MathF.Pow(2f, 1f / 3f);
-            float a1 = 1f / (2f * (2f - cbrt2));
-            float a2 = (1f - cbrt2) / (2f * (2f - cbrt2));
+            float w1 = 1f / (2f - cbrt2);
+            float w0 = -cbrt2 / (2f - cbrt2);
+            // w1 + w0 + w1 = 1 which is true 4th-order composition
 
-            ComputePositionBasedOnVerletIntegration(a1 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
-            ComputePositionBasedOnVerletIntegration(a2 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
-            ComputePositionBasedOnVerletIntegration(a1 * timeStep, shouldRecordTrail);
+            ComputePositionBasedOnVerletIntegration(w1 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
+            ComputePositionBasedOnVerletIntegration(w0 * timeStep, false); // Defaults to not recording trail in this instance, as it would clutter the trail
+            ComputePositionBasedOnVerletIntegration(w1 * timeStep, shouldRecordTrail);
         }
 
         public void ComputePositionBasedOnRungeKuttaFourthOrder(float timeStep, bool shouldRecordTrail)

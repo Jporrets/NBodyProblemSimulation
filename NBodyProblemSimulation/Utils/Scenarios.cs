@@ -1,8 +1,5 @@
 ﻿using NBodyProblemSimulation.Classes;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
+using static NBodyProblemSimulation.Utils.CustomVector2d;
 
 namespace NBodyProblemSimulation.Utils
 {
@@ -39,18 +36,18 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(100, 100),
-                velocity: new Vector2((float)-5.1E-02, (float)5.7847E-02),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(100, 100),
+                velocity: new Vector2d((float)-5.1E-02, (float)5.7847E-02),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Yellow
             );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(1200, 600),
-                velocity: new Vector2((float)5.1E-02, (float)-5.7847E-02),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(1200, 600),
+                velocity: new Vector2d((float)5.1E-02, (float)-5.7847E-02),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
             );
@@ -78,27 +75,27 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 3,
-                position: new Vector2(300, 800),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(300, 800),
+                velocity: new Vector2d(0, 0),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
                 );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 5,
-                position: new Vector2(1100, 800),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(1100, 800),
+                velocity: new Vector2d(0, 0),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LightSteelBlue
                 );
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 4,
-                position: new Vector2(300, 200),
-                velocity: new Vector2(0, 0),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(300, 200),
+                velocity: new Vector2d(0, 0),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.YellowGreen
                 );
@@ -128,27 +125,27 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(700f + 200f, 500f + 0), // Top vertex
-                velocity: new Vector2(0, distanceToCenterOfMass * angularVelocity / 2),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f + 200f, 500f + 0), // Top vertex
+                velocity: new Vector2d(0, distanceToCenterOfMass * angularVelocity / 2),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
             );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(700f - distanceToCenterOfMass / 2, 500f + (float)Math.Sqrt(3) * distanceToCenterOfMass / 2), // Bottom left vertex
-                velocity: new Vector2(-(float)Math.Sqrt(3) * distanceToCenterOfMass * angularVelocity / 4, -0.5f * angularVelocity * distanceToCenterOfMass / 2),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f - distanceToCenterOfMass / 2, 500f + (float)Math.Sqrt(3) * distanceToCenterOfMass / 2), // Bottom left vertex
+                velocity: new Vector2d(-(float)Math.Sqrt(3) * distanceToCenterOfMass * angularVelocity / 4, -0.5f * angularVelocity * distanceToCenterOfMass / 2),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
             );
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(700f - distanceToCenterOfMass / 2, 500f - (float)Math.Sqrt(3) * distanceToCenterOfMass / 2), // Bottom right vertex
-                velocity: new Vector2((float)Math.Sqrt(3) * distanceToCenterOfMass * angularVelocity / 4, -0.5f * angularVelocity * distanceToCenterOfMass / 2),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f - distanceToCenterOfMass / 2, 500f - (float)Math.Sqrt(3) * distanceToCenterOfMass / 2), // Bottom right vertex
+                velocity: new Vector2d((float)Math.Sqrt(3) * distanceToCenterOfMass * angularVelocity / 4, -0.5f * angularVelocity * distanceToCenterOfMass / 2),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
             );
@@ -174,9 +171,9 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1,
-                position: new Vector2(700f + 0.97000436e2f, 500f - 0.24308753e2f),
-                velocity: new Vector2(2.929e-1f, 2.717e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f + 0.97000436e2f, 500f - 0.24308753e2f),
+                velocity: new Vector2d(2.929e-1f, 2.717e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
             );
@@ -184,9 +181,9 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 1,
-                position: new Vector2(700f - 0.97000436e2f, 500f + 0.24308753e2f),
-                velocity: new Vector2(2.929e-1f, 2.717e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f - 0.97000436e2f, 500f + 0.24308753e2f),
+                velocity: new Vector2d(2.929e-1f, 2.717e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
             );
@@ -194,9 +191,9 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(700f + 0f, 500f + 0f),
-                velocity: new Vector2(-5.858e-1f, -5.434e-1f),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(700f + 0f, 500f + 0f),
+                velocity: new Vector2d(-5.858e-1f, -5.434e-1f),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
             );
@@ -223,27 +220,27 @@ namespace NBodyProblemSimulation.Utils
             CelestialBody Star1 = new CelestialBody(
                 name: "Star 1",
                 mass: 1.0283f,
-                position: new Vector2(900f - 162.064f, 500f),
-                velocity: new Vector2(0, -0.65955f * scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f - 162.064f, 500f),
+                velocity: new Vector2d(0, -0.65955f * scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.OrangeRed
                 );
             CelestialBody Star2 = new CelestialBody(
                 name: "Star 2",
                 mass: 0.9879f,
-                position: new Vector2(900f + 100f, 500f),
-                velocity: new Vector2(-0, -0.14784f * scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f + 100f, 500f),
+                velocity: new Vector2d(-0, -0.14784f * scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.Azure
                 );
             CelestialBody Star3 = new CelestialBody(
                 name: "Star 3",
                 mass: 1,
-                position: new Vector2(900f, 500f),
-                velocity: new Vector2(-0, 0.8222f * scalingFactor),
-                acceleration: new Vector2(0, 0),
+                position: new Vector2d(900f, 500f),
+                velocity: new Vector2d(-0, 0.8222f * scalingFactor),
+                acceleration: new Vector2d(0, 0),
                 radius: 5,
                 colorHex: Color.LimeGreen
                 );

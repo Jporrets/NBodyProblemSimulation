@@ -270,7 +270,7 @@ namespace NBodyProblemSimulation
                             {
                                 var vec = star.Trail[startIndex + j];
                                 // Apply Offset directly here
-                                batchPoints[j] = new PointF(vec.X + star.Radius, vec.Y + star.Radius);
+                                batchPoints[j] = new PointF( (float) vec.X + star.Radius, (float) vec.Y + star.Radius);
                             }
 
                             using (var pen = new Pen(Color.FromArgb(alpha, star.ColorHex), 1.5f))
@@ -283,8 +283,8 @@ namespace NBodyProblemSimulation
 
                 // --- STAR GLOW & BODY ---
                 // (Optimized: Removed repeated math)
-                float sX = star.Position.X;
-                float sY = star.Position.Y;
+                float sX = (float) star.Position.X;
+                float sY = (float) star.Position.Y;
 
                 // Draw glow (Outer to Inner)
                 for (int i = 3; i > 0; i--)
